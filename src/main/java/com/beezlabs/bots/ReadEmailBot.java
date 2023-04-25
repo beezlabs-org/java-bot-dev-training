@@ -9,15 +9,37 @@ import java.util.*;
 
 public class ReadEmailBot extends JavaBotTemplate {
     BotExecutionModel botExecutionModel;
+
     @Override
     protected void botLogic(BotExecutionModel botExecutionModel) {
         this.botExecutionModel = botExecutionModel;
-        List<String> emails = fetchEmails();
-        Map<String, String> hostCredentials = fetchHostCredentials();
+        String messageID = fetchMessageID();
     }
 
-    private List<String> fetchEmails() {
+    private String fetchMessageID() {
+        String messageID;
+        Map<String, Object> responseBody = new HashMap<>();
+        try {
+            Map<String, String> hostUserAndPassword = fetchHostCredentials();
+            String hostName = hostUserAndPassword.get("hostName");
+            String username = hostUserAndPassword.get("username");
+            String password = hostUserAndPassword.get("password");
+            TulipService tulipService = new TulipService(hostName, username, password);
+            responseBody = tulipService
+                    .getEmailReader()
+                    .filterBy()
+                    .folder("Inbox")
+                    // MAKE SURE INPUT PROPOSALS HAVE THE SAME NAME "From address" and "Subject"
 
+                    .fromAddress(botExecutionModel.getProposedBotInputs().get("From address").getValue().toString())
+                    .subject(botExecutionModel.getProposedBotInputs().get("Subject").getValue().toString())
+                    .newOnly(true)
+                    .getEmails();
+        } catch (Exception exception) {
+            error("while fetching emails " + exception.getMessage() + " " + Arrays.toString(exception.getStackTrace()));
+        }
+        messageID = (String) responseBody.get("messageID");
+        return messageID;
     }
 
     private Map<String, String> fetchHostCredentials() throws Exception {
