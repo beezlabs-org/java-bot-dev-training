@@ -12,14 +12,21 @@ public class ReadEmailBot extends JavaBotTemplate {
 
     @Override
     protected void botLogic(BotExecutionModel botExecutionModel) {
-        this.botExecutionModel = botExecutionModel;
-        String messageID = fetchMessageID();
+        try {
+            this.botExecutionModel = botExecutionModel;
+            String messageID = fetchMessageID();
+            addVariable("messageID", messageID);
+            success("messageID has been fetched and passed to the execution state");
+        } catch (Exception exception) {
+            error("while running botLogic method " + exception.getMessage() + " " + Arrays.toString(exception.getStackTrace()));
+        }
     }
 
     private String fetchMessageID() {
         String messageID;
         Map<String, Object> responseBody = new HashMap<>();
         try {
+            info("process to fetch the messageID has been initiated");
             Map<String, String> hostUserAndPassword = fetchHostCredentials();
             String hostName = hostUserAndPassword.get("hostName");
             String username = hostUserAndPassword.get("username");
@@ -36,7 +43,7 @@ public class ReadEmailBot extends JavaBotTemplate {
                     .newOnly(true)
                     .getEmails();
         } catch (Exception exception) {
-            error("while fetching emails " + exception.getMessage() + " " + Arrays.toString(exception.getStackTrace()));
+            error("while fetching messageID " + exception.getMessage() + " " + Arrays.toString(exception.getStackTrace()));
         }
         messageID = (String) responseBody.get("messageID");
         return messageID;
