@@ -1,0 +1,37 @@
+plugins {
+    id 'java'
+}
+
+
+group = 'com.beezlabs.bots'
+version '1.0-SNAPSHOT'
+sourceCompatibility = 11
+
+
+repositories {
+    mavenCentral()
+    maven {
+
+        url 'https://maven.pkg.github.com/beezlabs-org/tulip-java-agent'
+
+        credentials {
+            username = findProperty("gpr.user") ?: System.getenv("GPR_USERNAME")
+            password = findProperty("gpr.password") ?: System.getenv("GPR_PASSWORD")
+        }
+    }
+}
+
+dependencies {
+
+    implementation group: 'com.beezlabs.tulip-agent', name: 'libs', version: '2023.02.01-SNAPSHOT', changing: true
+    implementation 'com.beezlabs.tulip:lib:2023.02.01-SNAPSHOT'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+}
+
+
+test {
+    useJUnitPlatform()
+}
+
+
