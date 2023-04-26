@@ -22,8 +22,24 @@ public class ReadEmailBot extends JavaBotTemplate {
         }
     }
 
-    private String fetchMessageID() {
+    private String fetchMessageID() throws Exception {
         String messageID;
+        String fromAddress;
+        String subject;
+        try {
+            fromAddress = botExecutionModel.getProposedBotInputs().get("From address").getValue().toString();
+        } catch (NullPointerException nullPointerException) {
+            throw new NullPointerException("because the key 'From address' was not found in bot inputs map " + nullPointerException.getMessage());
+        } catch (Exception exception) {
+            throw new Exception("while fetching input 'From address' " + exception.getMessage() + " " + Arrays.toString(exception.getStackTrace()));
+        }
+        try {
+            subject = botExecutionModel.getProposedBotInputs().get("Subject").getValue().toString();
+        } catch (NullPointerException nullPointerException) {
+            throw new NullPointerException("because the key 'Subject' was not found in bot inputs map " + nullPointerException.getMessage());
+        } catch (Exception exception) {
+            throw new Exception("while fetching input 'Subject' " + exception.getMessage() + " " + Arrays.toString(exception.getStackTrace()));
+        }
         Map<String, Object> responseBody = new HashMap<>();
         try {
             info("process to fetch the messageID has been initiated");
@@ -38,8 +54,8 @@ public class ReadEmailBot extends JavaBotTemplate {
                     .folder("Inbox")
                     // MAKE SURE INPUT PROPOSALS HAVE THE SAME NAME "From address" and "Subject"
 
-                    .fromAddress(botExecutionModel.getProposedBotInputs().get("From address").getValue().toString())
-                    .subject(botExecutionModel.getProposedBotInputs().get("Subject").getValue().toString())
+                    .fromAddress(fromAddress)
+                    .subject(subject)
                     .newOnly(true)
                     .getEmails();
         } catch (Exception exception) {
