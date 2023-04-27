@@ -14,7 +14,8 @@ public class ReadEmailBot extends JavaBotTemplate {
     protected void botLogic(BotExecutionModel botExecutionModel) {
         try {
             this.botExecutionModel = botExecutionModel;
-            String messageID = fetchMessageID();
+            Map<String, String> requiredInputs = fetchRequiredInputs();
+            String messageID = fetchMessageID(requiredInputs);
             addVariable("messageID", messageID);
             success("messageID has been fetched and passed to the execution state");
         } catch (Exception exception) {
@@ -22,24 +23,27 @@ public class ReadEmailBot extends JavaBotTemplate {
         }
     }
 
-    private String fetchMessageID() throws Exception {
+    private Map<String, String> fetchRequiredInputs() {
+        Map<String, String> requiredInputs = new HashMap<>();
+        try {
+            requiredInputs.put("fromAddress", botExecutionModel.getProposedBotInputs().get("From address").getValue().toString());
+        } catch (NullPointerException nullPointerException) {
+            error("because the key 'From address' was not found in bot inputs map " + nullPointerException.getMessage());
+        } catch (Exception exception) {
+            error("while fetching input 'From address " + exception.getMessage() + " " + Arrays.toString(exception.getStackTrace()));
+        }
+        try {
+            requiredInputs.put("subject", botExecutionModel.getProposedBotInputs().get("Subject").getValue().toString());
+        } catch (NullPointerException nullPointerException) {
+            error("because the key 'Subject' was not found in bot inputs map " + nullPointerException.getMessage());
+        } catch (Exception exception) {
+            error("while fetching input 'Subject' " + exception.getMessage() + " " + Arrays.toString(exception.getStackTrace()));
+        }
+        return requiredInputs;
+    }
+
+    private String fetchMessageID(Map<String, String> inputsRequired) throws Exception {
         String messageID;
-        String fromAddress;
-        String subject;
-        try {
-            fromAddress = botExecutionModel.getProposedBotInputs().get("From address").getValue().toString();
-        } catch (NullPointerException nullPointerException) {
-            throw new NullPointerException("because the key 'From address' was not found in bot inputs map " + nullPointerException.getMessage());
-        } catch (Exception exception) {
-            throw new Exception("while fetching input 'From address' " + exception.getMessage() + " " + Arrays.toString(exception.getStackTrace()));
-        }
-        try {
-            subject = botExecutionModel.getProposedBotInputs().get("Subject").getValue().toString();
-        } catch (NullPointerException nullPointerException) {
-            throw new NullPointerException("because the key 'Subject' was not found in bot inputs map " + nullPointerException.getMessage());
-        } catch (Exception exception) {
-            throw new Exception("while fetching input 'Subject' " + exception.getMessage() + " " + Arrays.toString(exception.getStackTrace()));
-        }
         Map<String, Object> responseBody = new HashMap<>();
         try {
             info("process to fetch the messageID has been initiated");
@@ -54,8 +58,8 @@ public class ReadEmailBot extends JavaBotTemplate {
                     .folder("Inbox")
                     // MAKE SURE INPUT PROPOSALS HAVE THE SAME NAME "From address" and "Subject"
 
-                    .fromAddress(fromAddress)
-                    .subject(subject)
+                    .fromAddress(inputsRequired.get("fromAddress"))
+                    .subject(inputsRequired.get("subject"))
                     .newOnly(true)
                     .getEmails();
         } catch (Exception exception) {
