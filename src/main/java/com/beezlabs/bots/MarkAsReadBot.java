@@ -23,7 +23,7 @@ public class MarkAsReadBot extends JavaBotTemplate {
         }
     }
 
-    private void markAsRead() {
+    private String fetchRequiredInputs() {
         String messageID;
         try {
             try {
@@ -33,6 +33,16 @@ public class MarkAsReadBot extends JavaBotTemplate {
             } catch (Exception exception) {
                 throw new Exception("while fetching input messageID " + exception.getMessage() + " " + Arrays.toString(exception.getStackTrace()));
             }
+            return messageID;
+        } catch (Exception exception) {
+            error("while fetching required inputs " + exception.getMessage() + " " + Arrays.toString(exception.getStackTrace()));
+        }
+        return null;
+    }
+
+    private void markAsRead() {
+        try {
+            String messageID = fetchRequiredInputs();
             Map<String, String> hostCredentials = fetchHostCredentials();
             String hostName = hostCredentials.get("hostName");
             String username = hostCredentials.get("username");
