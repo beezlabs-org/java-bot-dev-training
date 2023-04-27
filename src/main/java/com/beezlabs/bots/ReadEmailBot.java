@@ -14,8 +14,7 @@ public class ReadEmailBot extends JavaBotTemplate {
     protected void botLogic(BotExecutionModel botExecutionModel) {
         try {
             this.botExecutionModel = botExecutionModel;
-            Map<String, String> requiredInputs = fetchRequiredInputs();
-            String messageID = fetchMessageID(requiredInputs);
+            String messageID = fetchMessageID();
             addVariable("messageID", messageID);
             success("messageID has been fetched and passed to the execution state");
         } catch (Exception exception) {
@@ -42,8 +41,9 @@ public class ReadEmailBot extends JavaBotTemplate {
         return requiredInputs;
     }
 
-    private String fetchMessageID(Map<String, String> inputsRequired) {
+    private String fetchMessageID() {
         String messageID;
+        Map<String, String> requiredInputs = fetchRequiredInputs();
         Map<String, Object> responseBody = new HashMap<>();
         try {
             info("process to fetch the messageID has been initiated");
@@ -58,8 +58,8 @@ public class ReadEmailBot extends JavaBotTemplate {
                     .folder("Inbox")
                     // MAKE SURE INPUT PROPOSALS HAVE THE SAME NAME "From address" and "Subject"
 
-                    .fromAddress(inputsRequired.get("fromAddress"))
-                    .subject(inputsRequired.get("subject"))
+                    .fromAddress(requiredInputs.get("fromAddress"))
+                    .subject(requiredInputs.get("subject"))
                     .newOnly(true)
                     .getEmails();
         } catch (Exception exception) {
