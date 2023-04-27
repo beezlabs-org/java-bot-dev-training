@@ -42,7 +42,7 @@ public class ReadEmailBot extends JavaBotTemplate {
         return requiredInputs;
     }
 
-    private String fetchMessageID(Map<String, String> inputsRequired) throws Exception {
+    private String fetchMessageID(Map<String, String> inputsRequired) {
         String messageID;
         Map<String, Object> responseBody = new HashMap<>();
         try {
